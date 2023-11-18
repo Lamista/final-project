@@ -33,16 +33,6 @@ def index():
     return apology("todo", 400)
 
 
-@app.route("/habits", methods=["GET"])
-@login_required
-def get_habits():
-    """Get habits"""
-    habits = db.execute(
-            "SELECT * FROM habits WHERE user_id = ?", session.get("user_id")
-    )
-    return render_template("habits.html", habits=habits)
-
-
 @app.route("/add-habit", methods=["GET", "POST"])
 @login_required
 def add_habit():
@@ -65,20 +55,45 @@ def add_habit():
         return redirect("/habits")
     else:
         return render_template("habit.html")
+    
+
+@app.route("/habits", methods=["GET"])
+@login_required
+def get_habits():
+    """Get habits"""
+    habits = db.execute(
+            "SELECT * FROM habits WHERE user_id = ?", session.get("user_id")
+    )
+    return render_template("habits.html", habits=habits)
 
 
 @app.route("/add-journal-entry", methods=["GET", "POST"])
 @login_required
 def add_journal_entry():
     """Add journal entry"""
-    return apology("todo", 400)
+    if request.method == "POST":
+        if not request.form.get("entry"):
+            return apology("must provide some text", 400)
+
+        db.execute(
+            "INSERT INTO journal_entries(user_id, entry_content) VALUES (?, ?)",
+            session.get("user_id"),
+            request.form.get("entry")
+        )
+
+        return redirect("/journal-history")
+    else:
+        return render_template("journal-entry.html")
 
 
 @app.route("/journal-history")
 @login_required
 def journal_history():
     """Show journal history"""
-    return apology("todo", 400)
+    entries = db.execute(
+            "SELECT * FROM journal_entries WHERE user_id = ? ORDER BY created_at DESC", session.get("user_id")
+    )
+    return render_template("journal-history.html", entries=entries)
 
 
 @app.route("/login", methods=["GET", "POST"])

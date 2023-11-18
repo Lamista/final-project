@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Add Journal Entry
+{% endblock %}
+
+{% block main %}
+<div class="row justify-content-center">
+    <div class="col-lg-6 col-md-8">
+        <form action="/add-journal-entry" method="post">
+            <div class="mb-3">
+                <textarea autocomplete="off" autofocus class="form-control" id="entry" name="entry"
+                    placeholder="How was your day?.." type="text" rows="10"></textarea>
+            </div>
+            <button class="btn btn-primary" type="submit">Save</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

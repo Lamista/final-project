@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Habits
+{% endblock %}
+
+{% block main %}
+<table class="table mx-auto w-auto">
+    <thead>
+        <tr>
+            <th>Habits</th>
+            <th>Rule</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for habit in habits %}
+        <tr>
+            <td>{{habit.name}}</td>
+            <td>{{habit.rule}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

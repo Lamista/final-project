@@ -37,14 +37,34 @@ def index():
 @login_required
 def get_habits():
     """Get habits"""
-    return apology("todo", 400)
+    habits = db.execute(
+            "SELECT * FROM habits WHERE user_id = ?", session.get("user_id")
+    )
+    return render_template("habits.html", habits=habits)
 
 
 @app.route("/add-habit", methods=["GET", "POST"])
 @login_required
 def add_habit():
     """Add habit"""
-    return apology("todo", 400)
+
+    if request.method == "POST":
+        if not request.form.get("habit"):
+            return apology("must provide habit", 400)
+
+        elif not request.form.get("rule"):
+            return apology("must provide rule", 400)
+
+        db.execute(
+            "INSERT INTO habits(user_id, name, rule) VALUES (?, ?, ?)",
+            session.get("user_id"),
+            request.form.get("habit"),
+            request.form.get("rule")
+        )
+
+        return redirect("/habits")
+    else:
+        return render_template("habit.html")
 
 
 @app.route("/add-journal-entry", methods=["GET", "POST"])

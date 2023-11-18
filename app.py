@@ -1,9 +1,9 @@
 from cs50 import SQL
-from flask import Flask, flash, redirect, render_template, request, session
+from flask import Flask, redirect, render_template, request, session
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from helpers import apology, login_required, lookup, usd
+from helpers import apology, login_required
 
 # Configure application
 app = Flask(__name__)
@@ -33,6 +33,13 @@ def index():
     return apology("todo", 400)
 
 
+@app.route("/habits", methods=["GET"])
+@login_required
+def get_habits():
+    """Get habits"""
+    return apology("todo", 400)
+
+
 @app.route("/add-habit", methods=["GET", "POST"])
 @login_required
 def add_habit():
@@ -50,11 +57,8 @@ def add_journal_entry():
 @app.route("/journal-history")
 @login_required
 def journal_history():
-    """Show history of transactions"""
-    transactions = db.execute(
-        "SELECT * FROM transactions WHERE user_id = ?", session.get("user_id")
-    )
-    return render_template("history.html", transactions=transactions)
+    """Show journal history"""
+    return apology("todo", 400)
 
 
 @app.route("/login", methods=["GET", "POST"])

@@ -67,6 +67,37 @@ def get_habits():
     return render_template("habits.html", habits=habits)
 
 
+@app.route("/edit-habit/<int:habit_id>", methods=["GET", "POST"])
+@login_required
+def edit_habit(habit_id):
+    """Edit habit"""
+    if request.method == "POST":
+        if not request.form.get("habit"):
+            return apology("must provide habit", 400)
+
+        elif not request.form.get("rule"):
+            return apology("must provide rule", 400)
+
+        db.execute(
+            "UPDATE habits SET name = ?, rule = ? WHERE habit_id = ?",
+            request.form.get("habit"),
+            request.form.get("rule"),
+            habit_id
+        )
+
+        return redirect("/habits")
+    else:
+        rows = db.execute(
+            "SELECT * FROM habits WHERE habit_id = ?", habit_id
+        )
+        habit = rows[0]
+
+        if not habit:
+            return apology("something went wrong", 400)
+        
+        return render_template("edit-habit.html", habit=habit)
+
+
 @app.route("/add-journal-entry", methods=["GET", "POST"])
 @login_required
 def add_journal_entry():

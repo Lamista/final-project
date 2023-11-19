@@ -10,6 +10,7 @@ Habits
         <tr>
             <th>Habits</th>
             <th>Rule</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -17,6 +18,12 @@ Habits
         <tr>
             <td>{{habit.name}}</td>
             <td>{{habit.rule}}</td>
+            <td>
+                <a href="/edit-habit/{{ habit.habit_id }}" class="icon-link"><span
+                        class="material-icons grey_color">edit</span></a>
+                <a href="/delete-habit/{{ habit.habit_id }}" class="icon-link"><span
+                        class="material-icons grey_color">delete</span></a>
+            </td>
         </tr>
         {% endfor %}
     </tbody>

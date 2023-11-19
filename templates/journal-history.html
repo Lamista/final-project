@@ -10,6 +10,7 @@ Journal History
         <tr>
             <th>Date</th>
             <th>Entry</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -17,6 +18,12 @@ Journal History
         <tr>
             <td>{{entry.created_at}}</td>
             <td>{{entry.entry_content}}</td>
+            <td>
+                <a href="/edit-journal-entry/{{ entry.entry_id }}" class="icon-link"><span
+                        class="material-icons grey_color">edit</span></a>
+                <a href="/delete-journal-entry/{{ entry.entry_id }}" class="icon-link"><span
+                        class="material-icons grey_color">delete</span></a>
+            </td>
         </tr>
         {% endfor %}
     </tbody>

@@ -127,6 +127,32 @@ def journal_history():
     return render_template("journal-history.html", entries=entries)
 
 
+@app.route("/edit-journal-entry/<int:entry_id>", methods=["GET", "POST"])
+@login_required
+def edit_journal_entry(entry_id):
+    """Edit journal entry"""
+    if request.method == "POST":
+        if not request.form.get("entry"):
+            return apology("must provide some text", 400)
+
+        db.execute(
+            "UPDATE journal_entries SET entry_content = ? WHERE entry_id = ?",
+            request.form.get("entry"),
+            entry_id
+        )
+
+        return redirect("/journal-history")
+    else:
+        rows = db.execute(
+            "SELECT * FROM journal_entries WHERE entry_id = ?", entry_id
+        )
+        entry = rows[0]
+
+        if not entry:
+            return apology("something went wrong", 400)
+        return render_template("edit-journal-entry.html", entry=entry)
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Log user in"""

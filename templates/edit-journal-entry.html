@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Edit Journal Entry
+{% endblock %}
+
+{% block main %}
+<div class="row justify-content-center">
+    <div class="col-lg-6 col-md-8">
+        <form action="/edit-journal-entry/{{ entry.entry_id }}" method="post">
+            <div class="mb-3">
+                <textarea autocomplete="off" autofocus class="form-control" id="entry" name="entry" type="text"
+                    rows="10">{{ entry.entry_content }}</textarea>
+            </div>
+            <button class="btn btn-primary" type="submit">Update Entry</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

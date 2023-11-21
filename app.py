@@ -1,7 +1,8 @@
 from cs50 import SQL
-from flask import Flask, redirect, render_template, request, session
+from flask import Flask, jsonify, redirect, render_template, request, session
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
+from datetime import datetime, timedelta
 
 from helpers import apology, login_required
 
@@ -64,7 +65,23 @@ def get_habits():
     habits = db.execute(
             "SELECT * FROM habits WHERE user_id = ?", session.get("user_id")
     )
-    return render_template("habits.html", habits=habits)
+
+    today = datetime.now().date()
+    dates = [(today + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(-3, 4)]
+
+    today = datetime.now().date()
+    start_date = today - timedelta(days=3)
+    end_date = today + timedelta(days=3)
+
+    for habit in habits:
+        completions = db.execute(
+            "SELECT date_completed FROM completions WHERE habit_id = ? AND date_completed BETWEEN ? AND ?",
+            habit["habit_id"], start_date, end_date
+        )
+
+        habit["completions"] = [comp["date_completed"] for comp in completions]
+
+    return render_template("habits.html", habits=habits, dates=dates)
 
 
 @app.route("/edit-habit/<int:habit_id>", methods=["GET", "POST"])
@@ -96,6 +113,26 @@ def edit_habit(habit_id):
             return apology("something went wrong", 400)
         
         return render_template("edit-habit.html", habit=habit)
+
+
+@app.route("/toggle-completion", methods=["POST"])
+@login_required
+def toggle_completion():
+    """Toggle completion"""
+    data = request.get_json()
+    habit_id = data['habit_id']
+    date = data['date']
+    completed = data['completed']
+
+    if not habit_id:
+        return apology("something went wrong", 400)
+        
+    if completed:
+        db.execute("INSERT OR IGNORE INTO completions(habit_id, date_completed) VALUES (?, ?)", habit_id, date)
+    else:
+        db.execute("DELETE FROM completions WHERE habit_id = ? AND date_completed = ?", habit_id, date)
+
+    return jsonify({'status': 'success', 'message': 'Completion updated'})
 
 
 @app.route("/add-journal-entry", methods=["GET", "POST"])

@@ -135,6 +135,20 @@ def toggle_completion():
     return jsonify({'status': 'success', 'message': 'Completion updated'})
 
 
+@app.route("/delete-habit/<int:habit_id>", methods=["DELETE"])
+@login_required
+def delete_habit(habit_id):
+    """Delete habit"""
+
+    if not habit_id:
+            return apology("something went wrong", 400)
+
+    db.execute("DELETE FROM completions WHERE habit_id = ?", habit_id)
+    db.execute("DELETE FROM habits WHERE habit_id = ?", habit_id)
+
+    return jsonify({'success': 'Habit deleted'})
+
+
 @app.route("/add-journal-entry", methods=["GET", "POST"])
 @login_required
 def add_journal_entry():
@@ -188,6 +202,19 @@ def edit_journal_entry(entry_id):
         if not entry:
             return apology("something went wrong", 400)
         return render_template("edit-journal-entry.html", entry=entry)
+    
+
+@app.route("/delete-entry/<int:entry_id>", methods=["DELETE"])
+@login_required
+def delete_entry(entry_id):
+    """Delete journal entry"""
+
+    if not entry_id:
+            return apology("something went wrong", 400)
+
+    db.execute("DELETE FROM journal_entries WHERE entry_id = ?", entry_id)
+
+    return jsonify({'success': 'Journal entry deleted'})
 
 
 @app.route("/login", methods=["GET", "POST"])

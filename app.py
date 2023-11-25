@@ -4,7 +4,7 @@ from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime, timedelta
 
-from helpers import apology, login_required
+from helpers import apology, login_required, validate_password
 
 # Configure application
 app = Flask(__name__)
@@ -274,14 +274,16 @@ def register():
     session.clear()
 
     if request.method == "POST":
+        # password validation
+        password = request.form.get("password")
+        validate_password(password)
+
+        # registration info
         if not request.form.get("username"):
             return apology("must provide username", 400)
 
-        elif not request.form.get("password"):
-            return apology("must provide password", 400)
-
-        elif not request.form.get("confirmation"):
-            return apology("must repeat password", 400)
+        if password != request.form.get("confirmation"):
+            return apology("passwords do not match", 400)
 
         rows = db.execute(
             "SELECT * FROM users WHERE username = ?", request.form.get("username")
@@ -290,13 +292,10 @@ def register():
         if len(rows) > 0:
             return apology("username already exists", 400)
 
-        if request.form.get("password") != request.form.get("confirmation"):
-            return apology("passwords do not match", 400)
-
         id = db.execute(
             "INSERT INTO users(username, hash) VALUES (?, ?)",
             request.form.get("username"),
-            generate_password_hash(request.form.get("password")),
+            generate_password_hash(password),
         )
 
         session["user_id"] = id
@@ -314,12 +313,12 @@ def change_password():
     if request.method == "POST":
         if not request.form.get("current_password"):
             return apology("must provide current password", 400)
+        
+        new_password = request.form.get("password")
+        validate_password(new_password)
 
-        elif not request.form.get("new_password"):
-            return apology("must provide new password", 400)
-
-        elif not request.form.get("confirmation"):
-            return apology("must repeat new password", 400)
+        if new_password != request.form.get("confirmation"):
+            return apology("new passwords do not match", 400)
 
         hash = db.execute(
             "SELECT hash FROM users WHERE id = ?", session.get("user_id")
@@ -328,12 +327,9 @@ def change_password():
         if not check_password_hash(hash, request.form.get("current_password")):
             return apology("provided incorrect current password", 400)
 
-        if request.form.get("new_password") != request.form.get("confirmation"):
-            return apology("new passwords do not match", 400)
-
         db.execute(
             "UPDATE users SET hash = ? WHERE id = ?",
-            generate_password_hash(request.form.get("new_password")),
+            generate_password_hash(new_password),
             session.get("user_id"),
         )
 

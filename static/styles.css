@@ -15,3 +15,11 @@ nav .navbar-brand .blue {
 .clickable {
     cursor: pointer;
 }
+
+.requirement {
+    color: red;
+}
+
+.valid {
+    color: green;
+}

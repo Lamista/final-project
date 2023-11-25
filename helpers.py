@@ -1,5 +1,6 @@
 from flask import redirect, render_template, session
 from functools import wraps
+import re
 
 
 def apology(message, code=400):
@@ -29,3 +30,14 @@ def login_required(f):
             return redirect("/login")
         return f(*args, **kwargs)
     return decorated_function
+
+
+def validate_password(password):
+    if len(password) < 8:
+        return apology("Password must be at least 8 characters long", 400)
+
+    if not re.search("[a-z]", password) or \
+        not re.search("[A-Z]", password) or \
+        not re.search("[0-9]", password) or \
+        not re.search("[!@#$%^&*]", password):
+        return apology("Password must include uppercase, lowercase, numbers, and special characters", 400)

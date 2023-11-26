@@ -27,8 +27,14 @@ def after_request(response):
 @app.route("/")
 @login_required
 def index():
-    """Show all habits and if they were checked this week"""
-    return apology("todo", 400)
+    """Show habits and journal entries' info"""
+    today = datetime.now().date()
+    dates = [(today + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(-3, 4)]
+    
+    habits = get_habits_with_completions(today)
+    entries = database.get_entries(session.get("user_id"))
+    
+    return render_template("index.html", habits=habits, dates=dates, entries=entries)
 
 
 @app.route("/add-habit", methods=["GET", "POST"])
@@ -54,21 +60,26 @@ def add_habit():
 @login_required
 def get_habits():
     """Get habits"""
-    habits = database.get_habits(session.get("user_id"))
-
+    
     today = datetime.now().date()
     dates = [(today + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(-3, 4)]
+    
+    habits = get_habits_with_completions(today)
+    
+    return render_template("habits.html", habits=habits, dates=dates)
 
-    today = datetime.now().date()
+
+def get_habits_with_completions(today):
+    habits = database.get_habits(session.get("user_id"))
+
     start_date = today - timedelta(days=3)
     end_date = today + timedelta(days=3)
 
     for habit in habits:
         completions = database.get_completions(habit["habit_id"], start_date, end_date)
-
         habit["completions"] = [comp["date_completed"] for comp in completions]
-
-    return render_template("habits.html", habits=habits, dates=dates)
+        
+    return habits
 
 
 @app.route("/edit-habit/<int:habit_id>", methods=["GET", "POST"])
@@ -121,7 +132,7 @@ def delete_habit(habit_id):
     """Delete habit"""
 
     if not habit_id:
-            return apology("something went wrong", 400)
+        return apology("something went wrong", 400)
  
     database.delete_habit(habit_id)
 

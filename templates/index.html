@@ -5,33 +5,48 @@ Index
 {% endblock %}
 
 {% block main %}
+<h2>Habits History</h2>
 <table class="table mx-auto w-auto">
     <thead>
         <tr>
             <th>Habits</th>
-            <th>History</th>
+            <th>Rule</th>
+            {% for date in dates %}
+            <th>{{ date }}</th>
+            {% endfor %}
         </tr>
     </thead>
     <tbody>
+        {% for habit in habits %}
         <tr>
-            <td>{{}}</td>
-            <td>{{}}</td>
+            <td>{{habit.name}}</td>
+            <td>{{habit.rule}}</td>
+            {% for date in dates %}
+            <td>
+                {% if date in habit.completions %}
+                <span id="habit-{{ habit.habit_id }}-date-{{ date }}" class="material-icons">done</span>
+                {% else %}
+                <span id="habit-{{ habit.habit_id }}-date-{{ date }}" class="material-icons">clear</span>
+                {% endif %}
+            </td>
+            {% endfor %}
         </tr>
+        {% endfor %}
     </tbody>
 </table>
 <h2>Diary Entries</h2>
-<table class="table">
+<table class="table mx-auto w-auto">
     <thead>
         <tr>
             <th>Date</th>
-            <th>Name</th>
+            <th>Entry</th>
         </tr>
     </thead>
     <tbody>
-        {% for entry in diary_entries %}
+        {% for entry in entries %}
         <tr>
-            <td>{{}}</td>
-            <td>{{}}</td>
+            <td>{{entry.created_at}}</td>
+            <td>{{entry.entry_content}}</td>
         </tr>
         {% endfor %}
     </tbody>

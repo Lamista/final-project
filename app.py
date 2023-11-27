@@ -3,7 +3,7 @@ from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime, timedelta
 
-from helpers import apology, login_required, validate_password
+from helpers import apology, login_required, validate_password, evaluate_result
 import database
 import habit_service
 import entry_service
@@ -267,8 +267,3 @@ def change_password():
         return redirect("/")
     else:
         return render_template("change-password.html")
-    
-    
-def evaluate_result(res):
-    if not res["success"]:
-        return apology(res["msg"], 400)

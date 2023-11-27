@@ -49,3 +49,7 @@ def success(obj=None):
 
 def fail(message):
     return {"success": False, "msg": message}
+
+def evaluate_result(res):
+    if not res["success"]:
+        return apology(res["msg"], 400)

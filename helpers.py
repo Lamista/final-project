@@ -41,3 +41,11 @@ def validate_password(password):
         not re.search("[0-9]", password) or \
         not re.search("[!@#$%^&*]", password):
         return apology("Password must include uppercase, lowercase, numbers, and special characters", 400)
+    
+    
+def success(obj=None):
+    return {"success": True, "res": obj}
+
+
+def fail(message):
+    return {"success": False, "msg": message}

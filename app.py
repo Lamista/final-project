@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 
 from helpers import apology, login_required, validate_password
 import database
+import habit_service
+import entry_service
 
 # Configure application
 app = Flask(__name__)
@@ -28,11 +30,12 @@ def after_request(response):
 @login_required
 def index():
     """Show habits and journal entries' info"""
-    today = datetime.now().date()
-    dates = [(today + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(-3, 4)]
+    user_id = session.get("user_id")
     
-    habits = get_habits_with_completions(today)
-    entries = database.get_entries(session.get("user_id"))
+    habits = habit_service.get_habits(user_id)
+    dates = habit_service.get_dates()
+    
+    entries = entry_service.get_entries(user_id)
     
     return render_template("index.html", habits=habits, dates=dates, entries=entries)
 
@@ -43,14 +46,8 @@ def add_habit():
     """Add habit"""
 
     if request.method == "POST":
-        if not request.form.get("habit"):
-            return apology("must provide habit", 400)
-
-        elif not request.form.get("rule"):
-            return apology("must provide rule", 400)
-
-        database.add_habit(session.get("user_id"), request.form.get("habit"), request.form.get("rule"))
-
+        result = habit_service.add_habit(request.form, session.get("user_id"))
+        evaluate_result(result)
         return redirect("/habits")
     else:
         return render_template("habit.html")
@@ -61,25 +58,10 @@ def add_habit():
 def get_habits():
     """Get habits"""
     
-    today = datetime.now().date()
-    dates = [(today + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(-3, 4)]
-    
-    habits = get_habits_with_completions(today)
+    habits = habit_service.get_habits(session.get("user_id"))
+    dates = habit_service.get_dates()
     
     return render_template("habits.html", habits=habits, dates=dates)
-
-
-def get_habits_with_completions(today):
-    habits = database.get_habits(session.get("user_id"))
-
-    start_date = today - timedelta(days=3)
-    end_date = today + timedelta(days=3)
-
-    for habit in habits:
-        completions = database.get_completions(habit["habit_id"], start_date, end_date)
-        habit["completions"] = [comp["date_completed"] for comp in completions]
-        
-    return habits
 
 
 @app.route("/edit-habit/<int:habit_id>", methods=["GET", "POST"])
@@ -87,41 +69,27 @@ def get_habits_with_completions(today):
 def edit_habit(habit_id):
     """Edit habit"""
     if request.method == "POST":
-        if not request.form.get("habit"):
-            return apology("must provide habit", 400)
-
-        elif not request.form.get("rule"):
-            return apology("must provide rule", 400)
-
-        database.update_habits(request.form.get("habit"), request.form.get("rule"), habit_id)
+        result = habit_service.update_habit(request.form, habit_id)
+        evaluate_result(result)
 
         return redirect("/habits")
     else:
-        rows = database.get_habit(habit_id)
-        habit = rows[0]
-
-        if not habit:
-            return apology("something went wrong", 400)
+        result = habit_service.get_habit(habit_id)
+        evaluate_result(result)
         
-        return render_template("edit-habit.html", habit=habit)
+        return render_template("edit-habit.html", habit=result["res"])
 
 
-@app.route("/toggle-completion", methods=["POST"])
+@app.route("/toggle-completion", methods=["POST", "DELETE"])
 @login_required
 def toggle_completion():
     """Toggle completion"""
-    data = request.get_json()
-    habit_id = data['habit_id']
-    date = data['date']
-    completed = data['completed']
-
-    if not habit_id:
-        return apology("something went wrong", 400)
-        
-    if completed:
-        database.add_completion(habit_id, date)
-    else:
-        database.delete_completion(habit_id, date)
+       
+    if request.method == "POST":
+        result = habit_service.add_completion(request)
+    elif request.method == "DELETE":
+        result = habit_service.delete_completion(request)
+    evaluate_result(result)
 
     return jsonify({'status': 'success', 'message': 'Completion updated'})
 
@@ -131,10 +99,8 @@ def toggle_completion():
 def delete_habit(habit_id):
     """Delete habit"""
 
-    if not habit_id:
-        return apology("something went wrong", 400)
- 
-    database.delete_habit(habit_id)
+    result = habit_service.delete_habit(habit_id)
+    evaluate_result(result)
 
     return jsonify({'success': 'Habit deleted'})
 
@@ -301,3 +267,8 @@ def change_password():
         return redirect("/")
     else:
         return render_template("change-password.html")
+    
+    
+def evaluate_result(res):
+    if not res["success"]:
+        return apology(res["msg"], 400)

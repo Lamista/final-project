@@ -46,13 +46,13 @@ Habits
 
 <script>
     function toggleCompletion(habit_id, date, completed) {
+        body = JSON.stringify({
+            habit_id: habit_id,
+            date: date
+        })
         fetch('/toggle-completion', {
-            method: 'POST',
-            body: JSON.stringify({
-                habit_id: habit_id,
-                date: date,
-                completed: completed
-            }),
+            method: completed ? 'POST' : 'DELETE',
+            body: body,
             headers: {
                 'Content-Type': 'application/json'
             }

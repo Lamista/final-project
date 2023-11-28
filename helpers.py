@@ -34,22 +34,20 @@ def login_required(f):
 
 def validate_password(password):
     if len(password) < 8:
-        return apology("Password must be at least 8 characters long", 400)
+        return fail("Password must be at least 8 characters long")
 
     if not re.search("[a-z]", password) or \
         not re.search("[A-Z]", password) or \
         not re.search("[0-9]", password) or \
         not re.search("[!@#$%^&*]", password):
-        return apology("Password must include uppercase, lowercase, numbers, and special characters", 400)
+        return fail("Password must include uppercase, lowercase, numbers, and special characters")
+    
+    return success()
     
     
 def success(obj=None):
     return {"success": True, "res": obj}
 
 
-def fail(message):
-    return {"success": False, "msg": message}
-
-def evaluate_result(res):
-    if not res["success"]:
-        return apology(res["msg"], 400)
+def fail(message="something went wrong", code=400):
+    return {"success": False, "msg": message, "code": code}

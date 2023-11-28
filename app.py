@@ -1,12 +1,8 @@
 from flask import Flask, jsonify, redirect, render_template, request, session
 from flask_session import Session
-from werkzeug.security import check_password_hash, generate_password_hash
-from datetime import datetime, timedelta
 
-from helpers import apology, login_required, validate_password, evaluate_result
-import database
-import habit_service
-import entry_service
+from helpers import apology, login_required, validate_password
+import habit_service, entry_service, user_service
 
 # Configure application
 app = Flask(__name__)
@@ -44,10 +40,12 @@ def index():
 @login_required
 def add_habit():
     """Add habit"""
-
     if request.method == "POST":
         result = habit_service.add_habit(request.form, session.get("user_id"))
-        evaluate_result(result)
+        
+        if not result["success"]:
+            return apology(result["msg"], result["code"])
+
         return redirect("/habits")
     else:
         return render_template("habit.html")
@@ -57,7 +55,6 @@ def add_habit():
 @login_required
 def get_habits():
     """Get habits"""
-    
     habits = habit_service.get_habits(session.get("user_id"))
     dates = habit_service.get_dates()
     
@@ -70,12 +67,16 @@ def edit_habit(habit_id):
     """Edit habit"""
     if request.method == "POST":
         result = habit_service.update_habit(request.form, habit_id)
-        evaluate_result(result)
+        
+        if not result["success"]:
+            return apology(result["msg"], result["code"])
 
         return redirect("/habits")
     else:
         result = habit_service.get_habit(habit_id)
-        evaluate_result(result)
+        
+        if not result["success"]:
+            return apology(result["msg"], result["code"])
         
         return render_template("edit-habit.html", habit=result["res"])
 
@@ -84,12 +85,13 @@ def edit_habit(habit_id):
 @login_required
 def toggle_completion():
     """Toggle completion"""
-       
     if request.method == "POST":
         result = habit_service.add_completion(request)
     elif request.method == "DELETE":
         result = habit_service.delete_completion(request)
-    evaluate_result(result)
+    
+    if not result["success"]:
+        return apology(result["msg"], result["code"])
 
     return jsonify({'status': 'success', 'message': 'Completion updated'})
 
@@ -98,9 +100,10 @@ def toggle_completion():
 @login_required
 def delete_habit(habit_id):
     """Delete habit"""
-
     result = habit_service.delete_habit(habit_id)
-    evaluate_result(result)
+    
+    if not result["success"]:
+        return apology(result["msg"], result["code"])
 
     return jsonify({'success': 'Habit deleted'})
 
@@ -110,10 +113,10 @@ def delete_habit(habit_id):
 def add_journal_entry():
     """Add journal entry"""
     if request.method == "POST":
-        if not request.form.get("entry"):
-            return apology("must provide some text", 400)
-
-        database.add_entry(session.get("user_id"), request.form.get("entry"))
+        result = entry_service.add_entry(request.form, session.get("user_id"))
+        
+        if not result["success"]:
+            return apology(result["msg"], result["code"])
 
         return redirect("/journal-history")
     else:
@@ -124,7 +127,7 @@ def add_journal_entry():
 @login_required
 def journal_history():
     """Show journal history"""
-    entries = database.get_entries(session.get("user_id"))
+    entries = entry_service.get_entries(session.get("user_id"))
     return render_template("journal-history.html", entries=entries)
 
 
@@ -133,30 +136,29 @@ def journal_history():
 def edit_journal_entry(entry_id):
     """Edit journal entry"""
     if request.method == "POST":
-        if not request.form.get("entry"):
-            return apology("must provide some text", 400)
-
-        database.update_entry(request.form.get("entry"), entry_id)
+        result = entry_service.update_entry(request.form, entry_id)
+        
+        if not result["success"]:
+            return apology(result["msg"], result["code"])
 
         return redirect("/journal-history")
     else:
-        rows = database.get_entry(entry_id)
-        entry = rows[0]
-
-        if not entry:
-            return apology("something went wrong", 400)
-        return render_template("edit-journal-entry.html", entry=entry)
+        result = entry_service.get_entry(entry_id)
+        
+        if not result["success"]:
+            return apology(result["msg"], result["code"])
+        
+        return render_template("edit-journal-entry.html", entry=result["res"])
     
 
 @app.route("/delete-entry/<int:entry_id>", methods=["DELETE"])
 @login_required
 def delete_entry(entry_id):
     """Delete journal entry"""
-
-    if not entry_id:
-            return apology("something went wrong", 400)
-
-    database.delete_entry(entry_id)
+    result = entry_service.delete_entry(entry_id)
+    
+    if not result["success"]:
+        return apology(result["msg"], result["code"])
 
     return jsonify({'success': 'Journal entry deleted'})
 
@@ -164,33 +166,23 @@ def delete_entry(entry_id):
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Log user in"""
-
     # Forget any user_id
     session.clear()
 
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
-        # Ensure username was submitted
-        if not request.form.get("username"):
-            return apology("must provide username", 400)
-
-        # Ensure password was submitted
-        elif not request.form.get("password"):
-            return apology("must provide password", 400)
-
-        # Query database for username
-        rows = database.get_user_by_username(request.form.get("username"))
-
-        # Ensure username exists and password is correct
-        if len(rows) != 1 or not check_password_hash(
-            rows[0]["hash"], request.form.get("password")
-        ):
-            return apology("invalid username and/or password", 403)
-
-        # Remember which user has logged in
-        session["user_id"] = rows[0]["id"]
-
-        # Redirect user to home page
+        
+        result = validate_password(request.form.get("password"))
+        
+        if not result["success"]:
+            return apology(result["msg"], result["code"])
+        
+        result = user_service.login(request.form)
+        
+        if not result["success"]:
+            return apology(result["msg"], result["code"])
+        
+        session["user_id"] = result["res"]
         return redirect("/")
 
     # User reached route via GET (as by clicking a link or via redirect)
@@ -201,7 +193,6 @@ def login():
 @app.route("/logout")
 def logout():
     """Log user out"""
-
     # Forget any user_id
     session.clear()
 
@@ -212,30 +203,21 @@ def logout():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Register user"""
-
     session.clear()
 
     if request.method == "POST":
-        # password validation
-        password = request.form.get("password")
-        validate_password(password)
-
-        # registration info
-        if not request.form.get("username"):
-            return apology("must provide username", 400)
-
-        if password != request.form.get("confirmation"):
-            return apology("passwords do not match", 400)
-
-        rows = database.get_user_by_username(request.form.get("username"))
-
-        if len(rows) > 0:
-            return apology("username already exists", 400)
-
-        id = database.add_user(request.form.get("username"), generate_password_hash(password))
-
-        session["user_id"] = id
-
+        
+        result = validate_password(request.form.get("password"))
+        
+        if not result["success"]:
+            return apology(result["msg"], result["code"])
+        
+        result = user_service.register(request.form)
+        
+        if not result["success"]:
+            return apology(result["msg"], result["code"])
+        
+        session["user_id"] = result["res"]
         return redirect("/")
     else:
         return render_template("register.html")
@@ -245,24 +227,16 @@ def register():
 @login_required
 def change_password():
     """Change password"""
-
     if request.method == "POST":
-        if not request.form.get("current_password"):
-            return apology("must provide current password", 400)
+        result = validate_password(request.form.get("password"))
         
-        new_password = request.form.get("password")
-        validate_password(new_password)
-
-        if new_password != request.form.get("confirmation"):
-            return apology("new passwords do not match", 400)
-
-        rows = database.get_user(session.get("user_id"))
-        hash = rows[0]["hash"]
-
-        if not check_password_hash(hash, request.form.get("current_password")):
-            return apology("provided incorrect current password", 400)
-
-        database.update_password(generate_password_hash(new_password), session.get("user_id"))
+        if not result["success"]:
+            return apology(result["msg"], result["code"])
+        
+        result = user_service.change_password(request.form, session.get("user_id"))
+        
+        if not result["success"]:
+            return apology(result["msg"], result["code"])
 
         return redirect("/")
     else:

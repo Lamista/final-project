@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from helpers import success, fail
+from helpers import success, fail, apology
 import database
 
 DAYS_BEFORE_TODAY = 6
@@ -34,7 +34,6 @@ def add_habit(form, user_id):
         return fail("must provide rule")
 
     database.add_habit(user_id, form.get("habit"), form.get("rule"))
-    
     return success()
 
 
@@ -55,14 +54,14 @@ def get_habit(habit_id):
     habit = rows[0]
 
     if not habit:
-        return fail("something went wrong")
+        return fail()
     
     return success(habit)
 
 
 def delete_habit(habit_id):
     if not habit_id:
-        return fail("something went wrong")
+        return fail()
  
     database.delete_habit(habit_id)
     
@@ -75,7 +74,7 @@ def add_completion(request):
     date = data['date']
     
     if not habit_id or not date:
-        return fail("something went wrong")
+        return fail()
     
     database.add_completion(habit_id, date)
     return success()
@@ -87,7 +86,7 @@ def delete_completion(request):
     date = data['date']
     
     if not habit_id or not date:
-        return fail("something went wrong")
+        return fail()
 
     database.delete_completion(habit_id, date)
     return success()

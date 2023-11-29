@@ -5,6 +5,8 @@ Index
 {% endblock %}
 
 {% block main %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
 <h2>Habits History</h2>
 <table class="table mx-auto w-auto">
     <thead>
@@ -46,9 +48,11 @@ Index
         {% for entry in entries %}
         <tr>
             <td>{{entry.created_at}}</td>
-            <td>{{entry.entry_content}}</td>
+            <td class="markdown-content" data-markdown="{{ entry.entry_content}}"></td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+
+<script src="../static/markdownPreview.js"></script>
 {% endblock %}

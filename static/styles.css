@@ -23,3 +23,15 @@ nav .navbar-brand .blue {
 .valid {
     color: green;
 }
+
+.markdown-preview {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-top: 20px;
+    background-color: #f8f8f8;
+    text-align: initial;
+}
+
+.markdown-content {
+    text-align: initial;
+}

@@ -5,15 +5,20 @@ Add Journal Entry
 {% endblock %}
 
 {% block main %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
 <div class="row justify-content-center">
     <div class="col-lg-6 col-md-8">
         <form action="/add-journal-entry" method="post">
             <div class="mb-3">
                 <textarea autocomplete="off" autofocus class="form-control" id="entry" name="entry"
-                    placeholder="How was your day?.." type="text" rows="10"></textarea>
+                    placeholder="How was your day?.." type="text" rows="10" oninput="updatePreview()"></textarea>
             </div>
             <button class="btn btn-primary" type="submit">Save</button>
         </form>
+        <div id="markdownPreview" class="markdown-preview"></div>
     </div>
 </div>
+
+<script src="../static/markdownPreview.js"></script>
 {% endblock %}

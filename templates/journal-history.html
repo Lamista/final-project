@@ -5,6 +5,8 @@ Journal History
 {% endblock %}
 
 {% block main %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
 <table class="table mx-auto w-auto">
     <thead>
         <tr>
@@ -17,7 +19,7 @@ Journal History
         {% for entry in entries %}
         <tr>
             <td>{{entry.created_at}}</td>
-            <td>{{entry.entry_content}}</td>
+            <td class="markdown-content" data-markdown="{{ entry.entry_content}}"></td>
             <td>
                 <a href="/edit-journal-entry/{{ entry.entry_id }}" class="icon-link"><span
                         class="material-icons grey_color">edit</span></a>
@@ -56,4 +58,5 @@ Journal History
             });
     }
 </script>
+<script src="../static/markdownPreview.js"></script>
 {% endblock %}

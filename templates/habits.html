@@ -5,6 +5,8 @@ Habits
 {% endblock %}
 
 {% block main %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <table class="table mx-auto w-auto">
     <thead>
         <tr>
@@ -13,6 +15,7 @@ Habits
             {% for date in dates %}
             <th>{{ date }}</th>
             {% endfor %}
+            <th>Total Completed / Rate / Current Streak</th>
             <th></th>
         </tr>
     </thead>
@@ -32,6 +35,8 @@ Habits
                 {% endif %}
             </td>
             {% endfor %}
+            <td>{{completion_counts[habit.name]}} / {{ habit.completion_rate | round(2) }}% / {{habit.current_streak}}
+            </td>
             <td>
                 <a href=" /edit-habit/{{ habit.habit_id }}" class="icon-link"><span
                         class="material-icons grey_color">edit</span></a>
@@ -43,6 +48,8 @@ Habits
         {% endfor %}
     </tbody>
 </table>
+<h2>TOP 5 Habits</h2>
+<canvas id="most-completed-habits" width="400" height="200"></canvas>
 
 <script>
     function toggleCompletion(habit_id, date, completed) {
@@ -101,6 +108,43 @@ Habits
                 console.error('Error:', error);
             });
     }
+
+    const habits = {{ habits_json | safe }};
+    const top5Habits = {{ top_5_habits_json | safe }};
+    const completionCounts = {{ completion_counts | safe }};
+
+    const topHabitsLabels = [];
+    const topHabitsData = [];
+
+    top5Habits.forEach(data => {
+        topHabitsLabels.push(data[0]);
+        topHabitsData.push(data[1]);
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const ctx = document.getElementById('most-completed-habits').getContext('2d');
+
+        const top5Habits = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: topHabitsLabels,
+                datasets: [{
+                    label: 'Number of Completions',
+                    data: topHabitsData,
+                    backgroundColor: 'rgba(0, 123, 255, 0.5)',
+                    borderColor: 'rgba(0, 123, 255, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
 </script>
 
 {% endblock %}

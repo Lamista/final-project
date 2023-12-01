@@ -21,9 +21,14 @@ def get_habits_with_completions(habits):
     return habits
 
 
-def get_dates():
-    today = datetime.now().date()
-    return [(today + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(-DAYS_BEFORE_TODAY, 1)]
+def get_completion_counts(habits):
+    completion_counts = {}
+    for habit in habits:
+        print(habit)
+        count = database.get_completion_counts(habit["habit_id"])
+        completion_counts[habit["name"]] = count
+    print(completion_counts)
+    return completion_counts
 
 
 def add_habit(form, user_id):
@@ -90,3 +95,41 @@ def delete_completion(request):
 
     database.delete_completion(habit_id, date)
     return success()
+
+
+def get_dates():
+    today = datetime.now().date()
+    return [(today + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(-DAYS_BEFORE_TODAY, 1)]
+
+
+def calculate_current_streak(completions):
+    if not completions:
+        return 0
+
+    today = datetime.now().date()
+    completions = sorted([datetime.strptime(date, '%Y-%m-%d').date() for date in completions])
+    streak = 0
+
+    for i in range(len(completions) - 1, -1, -1):
+        if completions[i] == today - timedelta(days=streak):
+            streak += 1
+        else:
+            break
+
+    return streak
+
+
+def calculate_completion_rate(completions, created_at):
+    if not completions:
+        return 0.0
+
+    completions_dates = [datetime.strptime(date, '%Y-%m-%d').date() for date in completions]
+    created_at_date = datetime.strptime(created_at, '%Y-%m-%d').date()
+    
+    first_completion_date = min(completions_dates)
+    start_date = min(created_at_date, first_completion_date)
+    
+    today = datetime.now().date()
+    total_days = (today - start_date).days + 1
+
+    return (len(completions_dates) / total_days) * 100

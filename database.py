@@ -21,7 +21,13 @@ def get_completions(habit_id, start_date, end_date):
         "SELECT date_completed FROM completions WHERE habit_id = ? AND date_completed BETWEEN ? AND ?",
         habit_id, start_date, end_date
     )
-    
+
+
+def get_completion_counts(habit_id):
+    return db.execute(
+        "SELECT COUNT(*) as count FROM completions WHERE habit_id = ?", habit_id
+    )[0]["count"]
+
 
 def update_habit(habit_name, habit_rule, habit_id):
     return db.execute(

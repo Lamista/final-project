@@ -1,3 +1,4 @@
+import json
 from flask import Flask, jsonify, redirect, render_template, request, session
 from flask_session import Session
 
@@ -58,7 +59,17 @@ def get_habits():
     habits = habit_service.get_habits(session.get("user_id"))
     dates = habit_service.get_dates()
     
-    return render_template("habits.html", habits=habits, dates=dates)
+    # for data visualization
+    # top 5
+    completion_counts = habit_service.get_completion_counts(habits)
+    sorted_habits_for_chart = sorted(completion_counts.items(), key=lambda x: x[1], reverse=True)
+    top_5_habits = sorted_habits_for_chart[:5]
+
+    for habit in habits:
+        habit['current_streak'] = habit_service.calculate_current_streak(habit['completions'])
+        habit['completion_rate'] = habit_service.calculate_completion_rate(habit["completions"], habit['created_at'])
+        
+    return render_template("habits.html", habits=habits, dates=dates, habits_json=json.dumps(habits), top_5_habits_json=json.dumps(top_5_habits), completion_counts=completion_counts)
 
 
 @app.route("/edit-habit/<int:habit_id>", methods=["GET", "POST"])

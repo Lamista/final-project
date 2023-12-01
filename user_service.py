@@ -48,7 +48,7 @@ def change_password(form, user_id):
     if form.get("password") != form.get("confirmation"):
         return fail("new passwords do not match")
 
-    rows = database.get_user(user_id)
+    rows = database.get_user_hash(user_id)
     hash = rows[0]["hash"]
 
     if not check_password_hash(hash, form.get("current_password")):
@@ -56,3 +56,13 @@ def change_password(form, user_id):
 
     database.update_password(generate_password_hash(form.get("password")),user_id)
     return success()
+
+
+def get_user_details(user_id):
+    rows = database.get_user(user_id)
+    user = rows[0]
+    
+    if not user:
+        fail()
+        
+    return success(user)

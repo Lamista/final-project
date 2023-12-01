@@ -35,3 +35,9 @@ nav .navbar-brand .blue {
 .markdown-content {
     text-align: initial;
 }
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}

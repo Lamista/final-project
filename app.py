@@ -142,11 +142,11 @@ def journal_history():
     return render_template("journal-history.html", entries=entries)
 
 
-@app.route("/edit-journal-entry/<int:entry_id>", methods=["GET", "POST"])
+@app.route("/edit-journal-entry/<int:entry_id>", methods=["GET", "PUT"])
 @login_required
 def edit_journal_entry(entry_id):
     """Edit journal entry"""
-    if request.method == "POST":
+    if request.method == "PUT":
         result = entry_service.update_entry(request.form, entry_id)
         
         if not result["success"]:
@@ -252,3 +252,14 @@ def change_password():
         return redirect("/")
     else:
         return render_template("change-password.html")
+    
+    
+@app.context_processor
+def inject_user():
+    user_id = session.get("user_id")
+    if user_id:
+        result = user_service.get_user_details(user_id)
+        user = result["res"]
+        print("user", user)
+        return {'username': user["username"]}
+    return {}

@@ -97,8 +97,12 @@ def add_user(username, hash):
     return db.execute("INSERT INTO users(username, hash) VALUES (?, ?)",username, hash)
 
 
-def get_user(user_id):
+def get_user_hash(user_id):
     return db.execute("SELECT hash FROM users WHERE id = ?", user_id)
+
+
+def get_user(user_id):
+    return db.execute("SELECT * FROM users WHERE id = ?", user_id)
 
 
 def update_password(hash, user_id):

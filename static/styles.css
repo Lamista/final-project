@@ -48,3 +48,13 @@ nav .navbar-brand .blue {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+@media (max-width: 768px) {
+    .fc .fc-toolbar {
+        display: block;
+    }
+
+    .fc .fc-toolbar-chunk {
+        margin-top: 5px;
+    }
+}

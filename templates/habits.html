@@ -11,44 +11,46 @@ Habits
     </a>
 </div>
 
-<table class="table mx-auto w-auto">
-    <thead>
-        <tr>
-            <th>Habits</th>
-            <th>Goal per Day</th>
-            {% for date in dates %}
-            <th>{{ date.split("-")[1] }}-{{ date.split("-")[2] }}</th>
+<div class="table-responsive">
+    <table class="table mx-auto w-auto">
+        <thead>
+            <tr>
+                <th>Habits</th>
+                <th>Goal per Day</th>
+                {% for date in dates %}
+                <th>{{ date.split("-")[1] }}-{{ date.split("-")[2] }}</th>
+                {% endfor %}
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for habit in habits %}
+            <tr>
+                <td>{{habit.name}}</td>
+                <td>{{habit.rule}}</td>
+                {% for date in dates %}
+                <td>
+                    {% if date in habit.completions %}
+                    <span id="habit-{{ habit.habit_id }}-date-{{ date }}" class="material-icons clickable"
+                        onclick="toggleCompletion('{{ habit.habit_id }}', '{{ date }}' , false)">done</span>
+                    {% else %}
+                    <span id="habit-{{ habit.habit_id }}-date-{{ date }}" class="material-icons clickable"
+                        onclick="toggleCompletion('{{ habit.habit_id }}', '{{ date }}', true)">clear</span>
+                    {% endif %}
+                </td>
+                {% endfor %}
+                <td>
+                    <a href=" /edit-habit/{{ habit.habit_id }}" class="icon-link"><span
+                            class="material-icons grey_color">edit</span></a>
+                    <a href="#" onclick="deleteHabit('{{ habit.habit_id }}')" class="icon-link">
+                        <span class="material-icons grey_color">delete</span>
+                    </a>
+                </td>
+            </tr>
             {% endfor %}
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for habit in habits %}
-        <tr>
-            <td>{{habit.name}}</td>
-            <td>{{habit.rule}}</td>
-            {% for date in dates %}
-            <td>
-                {% if date in habit.completions %}
-                <span id="habit-{{ habit.habit_id }}-date-{{ date }}" class="material-icons clickable"
-                    onclick="toggleCompletion('{{ habit.habit_id }}', '{{ date }}' , false)">done</span>
-                {% else %}
-                <span id="habit-{{ habit.habit_id }}-date-{{ date }}" class="material-icons clickable"
-                    onclick="toggleCompletion('{{ habit.habit_id }}', '{{ date }}', true)">clear</span>
-                {% endif %}
-            </td>
-            {% endfor %}
-            <td>
-                <a href=" /edit-habit/{{ habit.habit_id }}" class="icon-link"><span
-                        class="material-icons grey_color">edit</span></a>
-                <a href="javascript:void(0)" onclick="deleteHabit('{{ habit.habit_id }}')" class="icon-link">
-                    <span class="material-icons grey_color">delete</span>
-                </a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        </tbody>
+    </table>
+</div>
 
 <script>
     function toggleCompletion(habit_id, date, completed) {

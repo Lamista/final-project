@@ -47,7 +47,7 @@ def get_ids_and_dates(entries):
     for entry in entries:
         entries_ids_and_dates.append({
             "id": entry["entry_id"], 
-            "date": entry["created_at"].split(' ')[0],
+            "date": entry["created_at"].split(" ")[0],
             "content": entry["entry_content"]
             })
 

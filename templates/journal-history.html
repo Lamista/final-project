@@ -7,7 +7,7 @@ Journal History
 {% block main %}
 <div class="d-flex justify-content-end">
     <a href="/add-journal-entry" class="btn btn-primary">
-        <span class="material-icons">add</span> Habit
+        <span class="material-icons">add</span> Journal Entry
     </a>
 </div>
 
@@ -30,7 +30,7 @@ Journal History
             <td>
                 <a href="/edit-journal-entry/{{ entry.entry_id }}" class="icon-link"><span
                         class="material-icons grey_color">edit</span></a>
-                <a href="javascript:void(0)" onclick="deleteEntry('{{ entry.entry_id }}')" class="icon-link"><span
+                <a href="javascript:void(0)" onclick="deleteEntry(" {{ entry.entry_id }}")" class="icon-link"><span
                         class="material-icons grey_color">delete</span></a>
             </td>
         </tr>
@@ -43,33 +43,32 @@ Journal History
             return;
         }
 
-        fetch('/delete-entry/' + entry_id, {
-            method: 'DELETE',
+        fetch("/delete-entry/" + entry_id, {
+            method: "DELETE",
             headers: {
-                'Content-Type': 'application/json'
+                "Content-Type": "application/json"
             }
         })
             .then(response => {
                 if (response.ok) {
                     return response.json();
                 } else {
-                    throw new Error('Something went wrong');
+                    throw new Error("Something went wrong");
                 }
             })
             .then(data => {
-                console.log('Success:', data);
                 window.location.reload();
             })
             .catch((error) => {
-                console.error('Error:', error);
+                console.error("Error:", error);
             });
     }
 
     function truncateText(selector, maxLength) {
         const elements = document.querySelectorAll(selector);
         for (let i = 0; i < elements.length; i++) {
-            let element = elements[i];
-            let text = element.textContent || element.innerText;
+            const element = elements[i];
+            const text = element.textContent || element.innerText;
             element.textContent = truncateContent(text, maxLength);
         }
     }
@@ -81,8 +80,8 @@ Journal History
             return content;
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        truncateText('.truncate', 80);
+    document.addEventListener("DOMContentLoaded", function () {
+        truncateText(".truncate", 80);
     });
 </script>
 {% endblock %}

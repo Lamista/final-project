@@ -16,7 +16,7 @@ Session(app)
 
 @app.after_request
 def after_request(response):
-    """Ensure responses aren't cached"""
+    """Ensure responses aren"t cached"""
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Expires"] = 0
     response.headers["Pragma"] = "no-cache"
@@ -26,16 +26,34 @@ def after_request(response):
 @app.route("/")
 @login_required
 def index():
-    """Show habits and journal entries' info"""
+    """Show habits and journal entries" info"""
     user_id = session.get("user_id")
     
     habits = habit_service.get_habits(user_id)
     dates = habit_service.get_dates()
     
+    # for entries
     entries = entry_service.get_entries(user_id)
     entries_ids_and_dates = entry_service.get_ids_and_dates(entries)
+
+    # for habits
+    completion_counts = habit_service.get_completion_counts(habits)
+    sorted_habits_for_chart = sorted(completion_counts.items(), key=lambda x: x[1], reverse=True)
+    top_5_habits = sorted_habits_for_chart[:5]
+
+    for habit in habits:
+        habit["current_streak"] = habit_service.calculate_current_streak(habit["completions"])
+        habit["completion_rate"] = habit_service.calculate_completion_rate(habit["completions"], habit["created_at"])
     
-    return render_template("index.html", habits=habits, dates=dates, entries=entries, entries_ids_and_dates_json=json.dumps(entries_ids_and_dates))
+    return render_template("index.html", 
+                           habits=habits, 
+                           dates=dates, 
+                           entries=entries, 
+                           entries_ids_and_dates_json=json.dumps(entries_ids_and_dates), 
+                           habits_json=json.dumps(habits), 
+                           top_5_habits_json=json.dumps(top_5_habits), 
+                           completion_counts=completion_counts
+                           )
 
 
 @app.route("/add-habit", methods=["GET", "POST"])
@@ -59,18 +77,8 @@ def get_habits():
     """Get habits"""
     habits = habit_service.get_habits(session.get("user_id"))
     dates = habit_service.get_dates()
-    
-    # for data visualization
-    # top 5
-    completion_counts = habit_service.get_completion_counts(habits)
-    sorted_habits_for_chart = sorted(completion_counts.items(), key=lambda x: x[1], reverse=True)
-    top_5_habits = sorted_habits_for_chart[:5]
-
-    for habit in habits:
-        habit['current_streak'] = habit_service.calculate_current_streak(habit['completions'])
-        habit['completion_rate'] = habit_service.calculate_completion_rate(habit["completions"], habit['created_at'])
-        
-    return render_template("habits.html", habits=habits, dates=dates, habits_json=json.dumps(habits), top_5_habits_json=json.dumps(top_5_habits), completion_counts=completion_counts)
+          
+    return render_template("habits.html", habits=habits, dates=dates)
 
 
 @app.route("/edit-habit/<int:habit_id>", methods=["GET", "POST"])
@@ -105,7 +113,7 @@ def toggle_completion():
     if not result["success"]:
         return apology(result["msg"], result["code"])
 
-    return jsonify({'status': 'success', 'message': 'Completion updated'})
+    return jsonify({"status": "success", "message": "Completion updated"})
 
 
 @app.route("/delete-habit/<int:habit_id>", methods=["DELETE"])
@@ -117,7 +125,7 @@ def delete_habit(habit_id):
     if not result["success"]:
         return apology(result["msg"], result["code"])
 
-    return jsonify({'success': 'Habit deleted'})
+    return jsonify({"success": "Habit deleted"})
 
 
 @app.route("/add-journal-entry", methods=["GET", "POST"])
@@ -184,7 +192,7 @@ def delete_entry(entry_id):
     if not result["success"]:
         return apology(result["msg"], result["code"])
 
-    return jsonify({'success': 'Journal entry deleted'})
+    return jsonify({"success": "Journal entry deleted"})
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -273,6 +281,5 @@ def inject_user():
     if user_id:
         result = user_service.get_user_details(user_id)
         user = result["res"]
-        print("user", user)
-        return {'username': user["username"]}
+        return {"username": user["username"]}
     return {}

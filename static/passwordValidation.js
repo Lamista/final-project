@@ -1,6 +1,6 @@
 function validatePassword() {
-    let password = document.getElementById("password").value;
-    let repeat_password = document.getElementById("confirmation").value;
+    const password = document.getElementById("password").value;
+    const repeat_password = document.getElementById("confirmation").value;
 
     let lengthCheck = password.length >= 8;
     let uppercaseCheck = /[A-Z]/.test(password);
@@ -20,7 +20,7 @@ function validatePassword() {
 }
 
 function updateRequirementDisplay(requirementId, isValid) {
-    let requirement = document.getElementById(requirementId);
+    const requirement = document.getElementById(requirementId);
     if (isValid) {
         requirement.classList.add("valid");
     } else {

@@ -5,8 +5,6 @@ Habits
 {% endblock %}
 
 {% block main %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <div class="d-flex justify-content-end">
     <a href="/add-habit" class="btn btn-primary">
         <span class="material-icons">add</span> Habit
@@ -17,11 +15,10 @@ Habits
     <thead>
         <tr>
             <th>Habits</th>
-            <th>Rule</th>
+            <th>Goal per Day</th>
             {% for date in dates %}
-            <th>{{ date }}</th>
+            <th>{{ date.split("-")[1] }}-{{ date.split("-")[2] }}</th>
             {% endfor %}
-            <th>Total Completed / Rate / Current Streak</th>
             <th></th>
         </tr>
     </thead>
@@ -34,19 +31,17 @@ Habits
             <td>
                 {% if date in habit.completions %}
                 <span id="habit-{{ habit.habit_id }}-date-{{ date }}" class="material-icons clickable"
-                    onclick="toggleCompletion('{{ habit.habit_id }}', '{{ date }}', false)">done</span>
+                    onclick="toggleCompletion(" {{ habit.habit_id }}", "{{ date }}" , false)">done</span>
                 {% else %}
                 <span id="habit-{{ habit.habit_id }}-date-{{ date }}" class="material-icons clickable"
-                    onclick="toggleCompletion('{{ habit.habit_id }}', '{{ date }}', true)">clear</span>
+                    onclick="toggleCompletion(" {{ habit.habit_id }}", "{{ date }}" , true)">clear</span>
                 {% endif %}
             </td>
             {% endfor %}
-            <td>{{completion_counts[habit.name]}} / {{ habit.completion_rate | round(2) }}% / {{habit.current_streak}}
-            </td>
             <td>
                 <a href=" /edit-habit/{{ habit.habit_id }}" class="icon-link"><span
                         class="material-icons grey_color">edit</span></a>
-                <a href="javascript:void(0)" onclick="deleteHabit('{{ habit.habit_id }}')" class="icon-link">
+                <a href="javascript:void(0)" onclick="deleteHabit(" {{ habit.habit_id }}")" class="icon-link">
                     <span class="material-icons grey_color">delete</span>
                 </a>
             </td>
@@ -54,8 +49,6 @@ Habits
         {% endfor %}
     </tbody>
 </table>
-<h2>TOP 5 Habits</h2>
-<canvas id="most-completed-habits" width="400" height="200"></canvas>
 
 <script>
     function toggleCompletion(habit_id, date, completed) {
@@ -63,28 +56,28 @@ Habits
             habit_id: habit_id,
             date: date
         })
-        fetch('/toggle-completion', {
-            method: completed ? 'POST' : 'DELETE',
+        fetch("/toggle-completion", {
+            method: completed ? "POST" : "DELETE",
             body: body,
             headers: {
-                'Content-Type': 'application/json'
+                "Content-Type": "application/json"
             }
         })
             .then(response => response.json())
             .then(data => {
-                if (data.status === 'success') {
-                    const iconElement = document.getElementById('habit-' + habit_id + '-date-' + date);
+                if (data.status === "success") {
+                    const iconElement = document.getElementById("habit-" + habit_id + "-date-" + date);
                     if (completed) {
                         iconElement.innerText = "done";
-                        iconElement.setAttribute("onclick", `toggleCompletion(${habit_id}, '${date}', false)`);
+                        iconElement.setAttribute("onclick", `toggleCompletion(${habit_id}, "${date}", false)`);
                     } else {
                         iconElement.innerText = "clear";
-                        iconElement.setAttribute("onclick", `toggleCompletion(${habit_id}, '${date}', true)`);
+                        iconElement.setAttribute("onclick", `toggleCompletion(${habit_id}, "${date}", true)`);
                     }
                 }
             })
             .catch((error) => {
-                console.error('Error:', error);
+                console.error("Error:", error);
             });
     }
 
@@ -93,64 +86,26 @@ Habits
             return;
         }
 
-        fetch('/delete-habit/' + habit_id, {
-            method: 'DELETE',
+        fetch("/delete-habit/" + habit_id, {
+            method: "DELETE",
             headers: {
-                'Content-Type': 'application/json'
+                "Content-Type": "application/json"
             }
         })
             .then(response => {
                 if (response.ok) {
                     return response.json();
                 } else {
-                    throw new Error('Something went wrong');
+                    throw new Error("Something went wrong");
                 }
             })
             .then(data => {
-                console.log('Success:', data);
                 window.location.reload();
             })
             .catch((error) => {
-                console.error('Error:', error);
+                console.error("Error")
             });
     }
-
-    const habits = {{ habits_json | safe }};
-    const top5Habits = {{ top_5_habits_json | safe }};
-    const completionCounts = {{ completion_counts | safe }};
-
-    const topHabitsLabels = [];
-    const topHabitsData = [];
-
-    top5Habits.forEach(data => {
-        topHabitsLabels.push(data[0]);
-        topHabitsData.push(data[1]);
-    });
-
-    document.addEventListener('DOMContentLoaded', function () {
-        const ctx = document.getElementById('most-completed-habits').getContext('2d');
-
-        const top5Habits = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: topHabitsLabels,
-                datasets: [{
-                    label: 'Number of Completions',
-                    data: topHabitsData,
-                    backgroundColor: 'rgba(0, 123, 255, 0.5)',
-                    borderColor: 'rgba(0, 123, 255, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    });
 </script>
 
 {% endblock %}

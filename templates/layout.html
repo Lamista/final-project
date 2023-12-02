@@ -66,9 +66,18 @@
     </main>
 
     <footer class="mb-5 small text-center text-muted">
-        &copy; Laura St 2023
+        &copy; Laura St <span id="year"></span>
     </footer>
+
 
 </body>
 
 </html>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const currentYear = new Date().getFullYear();
+        const yearText = currentYear === 2023 ? "2023" : "2023 - " + currentYear;
+        document.getElementById("year").textContent = yearText;
+    });
+</script>

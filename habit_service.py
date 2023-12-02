@@ -24,10 +24,8 @@ def get_habits_with_completions(habits):
 def get_completion_counts(habits):
     completion_counts = {}
     for habit in habits:
-        print(habit)
         count = database.get_completion_counts(habit["habit_id"])
         completion_counts[habit["name"]] = count
-    print(completion_counts)
     return completion_counts
 
 
@@ -75,8 +73,8 @@ def delete_habit(habit_id):
 
 def add_completion(request):
     data = request.get_json()
-    habit_id = data['habit_id']
-    date = data['date']
+    habit_id = data["habit_id"]
+    date = data["date"]
     
     if not habit_id or not date:
         return fail()
@@ -87,8 +85,8 @@ def add_completion(request):
 
 def delete_completion(request):
     data = request.get_json()
-    habit_id = data['habit_id']
-    date = data['date']
+    habit_id = data["habit_id"]
+    date = data["date"]
     
     if not habit_id or not date:
         return fail()
@@ -107,7 +105,7 @@ def calculate_current_streak(completions):
         return 0
 
     today = datetime.now().date()
-    completions = sorted([datetime.strptime(date, '%Y-%m-%d').date() for date in completions])
+    completions = sorted([datetime.strptime(date, "%Y-%m-%d").date() for date in completions])
     streak = 0
 
     for i in range(len(completions) - 1, -1, -1):
@@ -123,8 +121,8 @@ def calculate_completion_rate(completions, created_at):
     if not completions:
         return 0.0
 
-    completions_dates = [datetime.strptime(date, '%Y-%m-%d').date() for date in completions]
-    created_at_date = datetime.strptime(created_at, '%Y-%m-%d').date()
+    completions_dates = [datetime.strptime(date, "%Y-%m-%d").date() for date in completions]
+    created_at_date = datetime.strptime(created_at, "%Y-%m-%d").date()
     
     first_completion_date = min(completions_dates)
     start_date = min(created_at_date, first_completion_date)

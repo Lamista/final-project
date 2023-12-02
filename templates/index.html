@@ -6,17 +6,18 @@ Index
 
 {% block main %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<h2>Habits History</h2>
+<h2>Habits</h2>
 <table class="table mx-auto w-auto">
     <thead>
         <tr>
             <th>Habits</th>
             <th>Rule</th>
-            {% for date in dates %}
-            <th>{{ date }}</th>
-            {% endfor %}
+            <th>Total Completed</th>
+            <th>Rate</th>
+            <th>Current Streak</th>
         </tr>
     </thead>
     <tbody>
@@ -24,30 +25,64 @@ Index
         <tr>
             <td>{{habit.name}}</td>
             <td>{{habit.rule}}</td>
-            {% for date in dates %}
-            <td>
-                {% if date in habit.completions %}
-                <span id="habit-{{ habit.habit_id }}-date-{{ date }}" class="material-icons">done</span>
-                {% else %}
-                <span id="habit-{{ habit.habit_id }}-date-{{ date }}" class="material-icons">clear</span>
-                {% endif %}
+            <td>{{completion_counts[habit.name]}}</td>
+            <td>{{ habit.completion_rate | round(2) }}%</td>
+            <td>{{habit.current_streak}}</td>
             </td>
-            {% endfor %}
         </tr>
         {% endfor %}
     </tbody>
 </table>
+<h2>TOP 5 Habits</h2>
+<canvas id="most-completed-habits" width="400" height="200"></canvas>
 <h2>Diary Entries</h2>
 <div id="calendar"></div>
 
 <script src="../static/markdownPreview.js"></script>
 <script>
+    const habits = {{ habits_json | safe }};
+    const top5Habits = {{ top_5_habits_json | safe }};
+    const completionCounts = {{ completion_counts | safe }};
+
+    const topHabitsLabels = [];
+    const topHabitsData = [];
+
+    top5Habits.forEach(data => {
+        topHabitsLabels.push(data[0]);
+        topHabitsData.push(data[1]);
+    });
+
     const entryIdsAndDates = {{ entries_ids_and_dates_json | safe }};
 
-    document.addEventListener('DOMContentLoaded', function () {
-        var calendarEl = document.getElementById('calendar');
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth'
+    document.addEventListener("DOMContentLoaded", function () {
+        // calendar info
+        const ctx = document.getElementById("most-completed-habits").getContext("2d");
+
+        const top5Habits = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: topHabitsLabels,
+                datasets: [{
+                    label: "Number of Completions",
+                    data: topHabitsData,
+                    backgroundColor: "rgba(0, 123, 255, 0.5)",
+                    borderColor: "rgba(0, 123, 255, 1)",
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // calendar
+        const calendarEl = document.getElementById("calendar");
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: "dayGridMonth"
         });
 
         entryIdsAndDates.map(function (entry) {

@@ -39,3 +39,12 @@ def delete_entry(entry_id):
     database.delete_entry(entry_id)
     
     return success()
+
+
+def get_dates(entries):
+    entries_dates = []
+    
+    for entry in entries:
+        entries_dates.append(entry["created_at"].split(' ')[0])
+
+    return entries_dates

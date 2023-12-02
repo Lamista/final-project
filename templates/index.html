@@ -6,6 +6,7 @@ Index
 
 {% block main %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
 
 <h2>Habits History</h2>
 <table class="table mx-auto w-auto">
@@ -54,5 +55,27 @@ Index
     </tbody>
 </table>
 
+<div id="calendar"></div>
+
 <script src="../static/markdownPreview.js"></script>
+<script>
+    const entryDates = {{ entries_dates_json | safe }};
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth'
+        });
+
+        entryDates.map(function (date) {
+            calendar.addEvent({
+                title: "✅ entry",
+                start: date
+            });
+        });
+
+        calendar.render();
+    });
+</script>
+
 {% endblock %}

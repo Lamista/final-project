@@ -33,8 +33,9 @@ def index():
     dates = habit_service.get_dates()
     
     entries = entry_service.get_entries(user_id)
+    entries_dates = entry_service.get_dates(entries)
     
-    return render_template("index.html", habits=habits, dates=dates, entries=entries)
+    return render_template("index.html", habits=habits, dates=dates, entries=entries, entries_dates_json=json.dumps(entries_dates))
 
 
 @app.route("/add-habit", methods=["GET", "POST"])

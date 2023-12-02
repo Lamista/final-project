@@ -38,28 +38,11 @@ Index
     </tbody>
 </table>
 <h2>Diary Entries</h2>
-<table class="table mx-auto w-auto">
-    <thead>
-        <tr>
-            <th>Date</th>
-            <th>Entry</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for entry in entries %}
-        <tr>
-            <td>{{entry.created_at}}</td>
-            <td class="markdown-content" data-markdown="{{ entry.entry_content}}"></td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
 <div id="calendar"></div>
 
 <script src="../static/markdownPreview.js"></script>
 <script>
-    const entryDates = {{ entries_dates_json | safe }};
+    const entryIdsAndDates = {{ entries_ids_and_dates_json | safe }};
 
     document.addEventListener('DOMContentLoaded', function () {
         var calendarEl = document.getElementById('calendar');
@@ -67,10 +50,11 @@ Index
             initialView: 'dayGridMonth'
         });
 
-        entryDates.map(function (date) {
+        entryIdsAndDates.map(function (entry) {
             calendar.addEvent({
-                title: "✅ entry",
-                start: date
+                title: entry.content,
+                start: entry.date,
+                url: `/journal-entry/${entry.id}`
             });
         });
 

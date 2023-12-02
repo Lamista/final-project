@@ -33,9 +33,9 @@ def index():
     dates = habit_service.get_dates()
     
     entries = entry_service.get_entries(user_id)
-    entries_dates = entry_service.get_dates(entries)
+    entries_ids_and_dates = entry_service.get_ids_and_dates(entries)
     
-    return render_template("index.html", habits=habits, dates=dates, entries=entries, entries_dates_json=json.dumps(entries_dates))
+    return render_template("index.html", habits=habits, dates=dates, entries=entries, entries_ids_and_dates_json=json.dumps(entries_ids_and_dates))
 
 
 @app.route("/add-habit", methods=["GET", "POST"])
@@ -132,7 +132,7 @@ def add_journal_entry():
 
         return redirect("/journal-history")
     else:
-        return render_template("journal-entry.html")
+        return render_template("create-journal-entry.html")
 
 
 @app.route("/journal-history")
@@ -161,6 +161,18 @@ def edit_journal_entry(entry_id):
             return apology(result["msg"], result["code"])
         
         return render_template("edit-journal-entry.html", entry=result["res"])
+
+
+@app.route("/journal-entry/<int:entry_id>", methods=["GET"])
+@login_required
+def get_journal_entry(entry_id):
+    """Journal entry"""
+    result = entry_service.get_entry(entry_id)
+    
+    if not result["success"]:
+        return apology(result["msg"], result["code"])
+    
+    return render_template("journal-entry.html", entry=result["res"])
     
 
 @app.route("/delete-entry/<int:entry_id>", methods=["DELETE"])

@@ -5,8 +5,6 @@ Journal History
 {% endblock %}
 
 {% block main %}
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
 <div class="d-flex justify-content-end">
     <a href="/add-journal-entry" class="btn btn-primary">
         <span class="material-icons">add</span> Habit
@@ -25,7 +23,10 @@ Journal History
         {% for entry in entries %}
         <tr>
             <td>{{entry.created_at}}</td>
-            <td class="markdown-content" data-markdown="{{ entry.entry_content}}"></td>
+            <td class="from-line-start truncate-text">
+                <a class="text-decoration-none truncate"
+                    href="/journal-entry/{{entry.entry_id}}">{{entry.entry_content}}</a>
+            </td>
             <td>
                 <a href="/edit-journal-entry/{{ entry.entry_id }}" class="icon-link"><span
                         class="material-icons grey_color">edit</span></a>
@@ -63,6 +64,25 @@ Journal History
                 console.error('Error:', error);
             });
     }
+
+    function truncateText(selector, maxLength) {
+        const elements = document.querySelectorAll(selector);
+        for (let i = 0; i < elements.length; i++) {
+            let element = elements[i];
+            let text = element.textContent || element.innerText;
+            element.textContent = truncateContent(text, maxLength);
+        }
+    }
+
+    function truncateContent(content, length = 100) {
+        if (content.length > length)
+            return content.substring(0, length) + "...";
+        else
+            return content;
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        truncateText('.truncate', 80);
+    });
 </script>
-<script src="../static/markdownPreview.js"></script>
 {% endblock %}

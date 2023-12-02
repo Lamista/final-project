@@ -41,3 +41,14 @@ nav .navbar-brand .blue {
     align-items: center;
     justify-content: center;
 }
+
+.from-line-start {
+    text-align: initial;
+}
+
+.truncate-text {
+    max-width: 80%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

@@ -41,10 +41,14 @@ def delete_entry(entry_id):
     return success()
 
 
-def get_dates(entries):
-    entries_dates = []
+def get_ids_and_dates(entries):
+    entries_ids_and_dates = []
     
     for entry in entries:
-        entries_dates.append(entry["created_at"].split(' ')[0])
+        entries_ids_and_dates.append({
+            "id": entry["entry_id"], 
+            "date": entry["created_at"].split(' ')[0],
+            "content": entry["entry_content"]
+            })
 
-    return entries_dates
+    return entries_ids_and_dates

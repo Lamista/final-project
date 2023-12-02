@@ -14,16 +14,16 @@ def add_entry(form, user_id):
     return success()
 
 
-def update_entry(form, entry_id):
+def update_entry(form, entry_id, user_id):
     if not form.get("entry"):
         return fail("must provide some text")
 
-    database.update_entry(form.get("entry"), entry_id)
+    database.update_entry(form.get("entry"), entry_id, user_id)
     return success()
 
 
-def get_entry(entry_id):
-    rows = database.get_entry(entry_id)
+def get_entry(entry_id, user_id):
+    rows = database.get_entry(entry_id, user_id)
     entry = rows[0]
 
     if not entry:
@@ -32,11 +32,11 @@ def get_entry(entry_id):
     return success(entry)
 
 
-def delete_entry(entry_id):
+def delete_entry(entry_id, user_id):
     if not entry_id:
         return fail()
 
-    database.delete_entry(entry_id)
+    database.delete_entry(entry_id, user_id)
     
     return success()
 

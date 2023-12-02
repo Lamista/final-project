@@ -31,17 +31,17 @@ Habits
             <td>
                 {% if date in habit.completions %}
                 <span id="habit-{{ habit.habit_id }}-date-{{ date }}" class="material-icons clickable"
-                    onclick="toggleCompletion(" {{ habit.habit_id }}", "{{ date }}" , false)">done</span>
+                    onclick="toggleCompletion('{{ habit.habit_id }}', '{{ date }}' , false)">done</span>
                 {% else %}
                 <span id="habit-{{ habit.habit_id }}-date-{{ date }}" class="material-icons clickable"
-                    onclick="toggleCompletion(" {{ habit.habit_id }}", "{{ date }}" , true)">clear</span>
+                    onclick="toggleCompletion('{{ habit.habit_id }}', '{{ date }}', true)">clear</span>
                 {% endif %}
             </td>
             {% endfor %}
             <td>
                 <a href=" /edit-habit/{{ habit.habit_id }}" class="icon-link"><span
                         class="material-icons grey_color">edit</span></a>
-                <a href="javascript:void(0)" onclick="deleteHabit(" {{ habit.habit_id }}")" class="icon-link">
+                <a href="javascript:void(0)" onclick="deleteHabit('{{ habit.habit_id }}')" class="icon-link">
                     <span class="material-icons grey_color">delete</span>
                 </a>
             </td>

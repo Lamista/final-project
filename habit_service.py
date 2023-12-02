@@ -40,20 +40,20 @@ def add_habit(form, user_id):
     return success()
 
 
-def update_habit(form, habit_id):
+def update_habit(form, habit_id, user_id):
     if not form.get("habit"):
         return fail("must provide habit")
 
     elif not form.get("rule"):
         return fail("must provide rule")
 
-    database.update_habit(form.get("habit"), form.get("rule"), habit_id)
+    database.update_habit(form.get("habit"), form.get("rule"), habit_id, user_id)
     
     return success()
 
 
-def get_habit(habit_id):
-    rows = database.get_habit(habit_id)
+def get_habit(habit_id, user_id):
+    rows = database.get_habit(habit_id, user_id)
     habit = rows[0]
 
     if not habit:
@@ -62,35 +62,39 @@ def get_habit(habit_id):
     return success(habit)
 
 
-def delete_habit(habit_id):
+def delete_habit(habit_id, user_id):
     if not habit_id:
         return fail()
  
+    if not database.get_habit(habit_id, user_id)[0]:
+        return fail()
     database.delete_habit(habit_id)
     
     return success()
 
 
-def add_completion(request):
+def add_completion(request, user_id):
     data = request.get_json()
     habit_id = data["habit_id"]
     date = data["date"]
     
     if not habit_id or not date:
         return fail()
-    
+    if not database.get_habit(habit_id, user_id)[0]:
+        return fail()
     database.add_completion(habit_id, date)
     return success()
 
 
-def delete_completion(request):
+def delete_completion(request, user_id):
     data = request.get_json()
     habit_id = data["habit_id"]
     date = data["date"]
     
     if not habit_id or not date:
         return fail()
-
+    if not database.get_habit(habit_id, user_id)[0]:
+        return fail()
     database.delete_completion(habit_id, date)
     return success()
 

@@ -29,18 +29,17 @@ def get_completion_counts(habit_id):
     )[0]["count"]
 
 
-def update_habit(habit_name, habit_rule, habit_id):
+def update_habit(habit_name, habit_rule, habit_id, user_id):
     return db.execute(
-        "UPDATE habits SET name = ?, rule = ? WHERE habit_id = ?",
-        habit_name, habit_rule, habit_id
+        "UPDATE habits SET name = ?, rule = ? WHERE habit_id = ? and user_id = ?",
+        habit_name, habit_rule, habit_id, user_id
     )
     
     
-def get_habit(habit_id):
+def get_habit(habit_id, user_id):
     return db.execute(
-        "SELECT * FROM habits WHERE habit_id = ?", habit_id
-    )  
-    
+        "SELECT * FROM habits WHERE habit_id = ? and user_id = ?", habit_id, user_id
+    )
     
 def add_completion(habit_id, date):
     return db.execute("INSERT OR IGNORE INTO completions(habit_id, date_completed) VALUES (?, ?)",
@@ -72,19 +71,19 @@ def get_entries(user_id):
     )
     
     
-def update_entry(entry, entry_id):
+def update_entry(entry, entry_id, user_id):
     return db.execute(
-        "UPDATE journal_entries SET entry_content = ? WHERE entry_id = ?",
-        entry, entry_id
+        "UPDATE journal_entries SET entry_content = ? WHERE entry_id = ? and user_id = ?",
+        entry, entry_id, user_id
     )
     
     
-def get_entry(entry_id):
-    return db.execute("SELECT * FROM journal_entries WHERE entry_id = ?", entry_id)
+def get_entry(entry_id, user_id):
+    return db.execute("SELECT * FROM journal_entries WHERE entry_id = ? and user_id = ?", entry_id, user_id)
 
 
-def delete_entry(entry_id):
-    return db.execute("DELETE FROM journal_entries WHERE entry_id = ?", entry_id)
+def delete_entry(entry_id, user_id):
+    return db.execute("DELETE FROM journal_entries WHERE entry_id = ? and user_id = ?", entry_id, user_id)
 
 
 # user

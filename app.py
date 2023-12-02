@@ -86,14 +86,14 @@ def get_habits():
 def edit_habit(habit_id):
     """Edit habit"""
     if request.method == "POST":
-        result = habit_service.update_habit(request.form, habit_id)
+        result = habit_service.update_habit(request.form, habit_id, session.get("user_id"))
         
         if not result["success"]:
             return apology(result["msg"], result["code"])
 
         return redirect("/habits")
     else:
-        result = habit_service.get_habit(habit_id)
+        result = habit_service.get_habit(habit_id, session.get("user_id"))
         
         if not result["success"]:
             return apology(result["msg"], result["code"])
@@ -106,9 +106,9 @@ def edit_habit(habit_id):
 def toggle_completion():
     """Toggle completion"""
     if request.method == "POST":
-        result = habit_service.add_completion(request)
+        result = habit_service.add_completion(request, session.get("user_id"))
     elif request.method == "DELETE":
-        result = habit_service.delete_completion(request)
+        result = habit_service.delete_completion(request, session.get("user_id"))
     
     if not result["success"]:
         return apology(result["msg"], result["code"])
@@ -120,7 +120,7 @@ def toggle_completion():
 @login_required
 def delete_habit(habit_id):
     """Delete habit"""
-    result = habit_service.delete_habit(habit_id)
+    result = habit_service.delete_habit(habit_id, session.get("user_id"))
     
     if not result["success"]:
         return apology(result["msg"], result["code"])
@@ -151,19 +151,19 @@ def journal_history():
     return render_template("journal-history.html", entries=entries)
 
 
-@app.route("/edit-journal-entry/<int:entry_id>", methods=["GET", "PUT"])
+@app.route("/edit-journal-entry/<int:entry_id>", methods=["GET", "POST"])
 @login_required
 def edit_journal_entry(entry_id):
     """Edit journal entry"""
-    if request.method == "PUT":
-        result = entry_service.update_entry(request.form, entry_id)
+    if request.method == "POST":
+        result = entry_service.update_entry(request.form, entry_id, session.get("user_id"))
         
         if not result["success"]:
             return apology(result["msg"], result["code"])
 
         return redirect("/journal-history")
     else:
-        result = entry_service.get_entry(entry_id)
+        result = entry_service.get_entry(entry_id, session.get("user_id"))
         
         if not result["success"]:
             return apology(result["msg"], result["code"])
@@ -175,7 +175,7 @@ def edit_journal_entry(entry_id):
 @login_required
 def get_journal_entry(entry_id):
     """Journal entry"""
-    result = entry_service.get_entry(entry_id)
+    result = entry_service.get_entry(entry_id, session.get("user_id"))
     
     if not result["success"]:
         return apology(result["msg"], result["code"])
@@ -187,7 +187,7 @@ def get_journal_entry(entry_id):
 @login_required
 def delete_entry(entry_id):
     """Delete journal entry"""
-    result = entry_service.delete_entry(entry_id)
+    result = entry_service.delete_entry(entry_id, session.get("user_id"))
     
     if not result["success"]:
         return apology(result["msg"], result["code"])

@@ -57,4 +57,12 @@ nav .navbar-brand .blue {
     .fc .fc-toolbar-chunk {
         margin-top: 5px;
     }
+
+    .date-column {
+        display: none;
+    }
+
+    .last-three-dates {
+        display: table-cell;
+    }
 }

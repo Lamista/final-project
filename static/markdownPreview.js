@@ -1,7 +1,8 @@
 document.addEventListener("DOMContentLoaded", (event) => {
     document.querySelectorAll(".markdown-preview").forEach((div) => {
         const markdown = div.getAttribute("data-markdown");
-        div.innerHTML = marked.parse(markdown);
+        if (markdown)
+            div.innerHTML = marked.parse(markdown);
     });
 });
 

@@ -7,7 +7,7 @@ function validatePassword() {
     let lowercaseCheck = /[a-z]/.test(password);
     let numberCheck = /[0-9]/.test(password);
     let specialCheck = /[!@#$%^&*]/.test(password);
-    let repeatCheck = password === repeat_password;
+    let repeatCheck = password === repeat_password && password.length > 0;
 
     updateRequirementDisplay("length", lengthCheck);
     updateRequirementDisplay("uppercase", uppercaseCheck);

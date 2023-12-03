@@ -9,10 +9,17 @@ Journal Entry
 
 <div class="row justify-content-center">
     <div class="col-lg-6 col-md-8">
+        <button onclick="goBack()" class="btn btn-secondary btn-sm mb-3 float-end">Go Back</button>
         <h4>{{entry.created_at}}</h4>
         <div id="markdownPreview" class="markdown-preview" data-markdown="{{ entry.entry_content}}"></div>
     </div>
 </div>
 
 <script src="../static/markdownPreview.js"></script>
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+
 {% endblock %}
